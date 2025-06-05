@@ -211,17 +211,7 @@ function Page() {
         setIsSubmitting(true);
 
         const urlParams = new URLSearchParams(window.location.search);
-        const hostname = window.location.hostname;
-
-        let redirectUrl = "";
-
-        if (hostname.includes("chahataggrawal.in")) {
-            redirectUrl = "https://stocktutor.chahataggrawal.in/vibhor/thankyou";
-        } else {
-            redirectUrl = "https://stocktutor.co/vibhor/thankyou";
-        }
-
-        window.location.href = redirectUrl;
+         const redirectUrl = "https://stocktutor.chahataggrawal.in/vibhor/thankyou";
 
         const data = {
             submittedAt: timestamp(),
@@ -274,47 +264,18 @@ function Page() {
 
     return (
         <>
-            {/* <Script id="taboola-pixel" strategy="afterInteractive">
+            <Script
+                strategy="afterInteractive"
+                src="https://www.googletagmanager.com/gtag/js?id=AW-17081559506"
+            />
+            <Script id="google-ads" strategy="afterInteractive">
                 {`
-          window._tfa = window._tfa || [];
-          window._tfa.push({notify: 'event', name: 'page_view', id: 1855234});
-          !function (t, f, a, x) {
-              if (!document.getElementById(x)) {
-                  t.async = 1;
-                  t.src = a;
-                  t.id = x;
-                  f.parentNode.insertBefore(t, f);
-              }
-          }(document.createElement('script'),
-            document.getElementsByTagName('script')[0],
-            '//cdn.taboola.com/libtrc/unip/1855234/tfa.js',
-            'tb_tfa_script');
-        `}
-            </Script> */}
-
-            <Script id="meta-pixel" strategy="afterInteractive">
-                {`
-                !function(f,b,e,v,n,t,s)
-                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                n.queue=[];t=b.createElement(e);t.async=!0;
-                t.src=v;s=b.getElementsByTagName(e)[0];
-                s.parentNode.insertBefore(t,s)}(window, document,'script',
-                'https://connect.facebook.net/en_US/fbevents.js');
-                fbq('init', '10041111282577074');
-                fbq('track', 'PageView');
-
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', 'AW-17081559506');
                 `}
             </Script>
-            <noscript>
-                <img
-                    height="1"
-                    width="1"
-                    style={{ display: 'none' }}
-                    src="https://www.facebook.com/tr?id=10041111282577074&ev=PageView&noscript=1"
-                />
-            </noscript>
 
             <title>Free Masterclass: Learn No-Code Algo Trading</title>
             <meta
