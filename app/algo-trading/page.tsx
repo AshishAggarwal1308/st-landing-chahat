@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { FaCheckCircle } from 'react-icons/fa';
 import Link from 'next/link';
@@ -23,7 +23,9 @@ import {
 
 import { formatDate_, timestamp } from '@/lib/masterclass_functions/formatDate';
 import Script from 'next/script';
-import { openRazorpayCheckout } from "../services/checkout.service";
+import PopupModal from '../components/FormPopup';
+import { openRazorpayCheckout, submitFormToPabbly } from '../services/checkout.service';
+
 
 const topics = [
     {
@@ -292,6 +294,12 @@ function Page() {
         setOfferEnd(months[tomorrow.getMonth()] + " " + tomorrow.getDate() + ", " + tomorrow.getFullYear())
     }, [])
 
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        document.body.appendChild(script);
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -304,15 +312,18 @@ function Page() {
         };
 
         let isValid = true;
-        const errors: any = {};
+        const errors: typeof formErrors = {};
+
         if (!formData.name) {
             errors.name = "Name is required.";
             isValid = false;
         }
+
         if (!isValidEmail(formData.email)) {
             errors.email = "Invalid email.";
             isValid = false;
         }
+
         if (!isValidPhone(formData.phone)) {
             errors.phone = "Invalid phone.";
             isValid = false;
@@ -328,12 +339,7 @@ function Page() {
         const urlParams = new URLSearchParams(window.location.search);
         const redirectUrl = "https://stocktutor.chahataggrawal.in/algo-trading/thankyou";
 
-        const baseData = {
-            submittedAt: timestamp(),
-            ...formData,
-            CampeignName: campName,
-            WorkShopTime: wDateTime,
-            WorkShopDate: wDate,
+        const utms = {
             utm_source: urlParams.get("utm_source"),
             utm_medium: urlParams.get("utm_medium"),
             utm_campaign: urlParams.get("utm_campaign"),
@@ -342,32 +348,38 @@ function Page() {
             utm_term: urlParams.get("utm_term"),
             adsetName: urlParams.get("adset name"),
             adName: urlParams.get("ad name"),
+        };
+
+        const payload = {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            campaignName: campName,
+            workshopDate: wDate,
+            workshopTime: wDateTime,
+            utms,
+            submittedAt: timestamp(),
             landingPageUrl: window.location.href,
         };
 
-        openRazorpayCheckout(formData, async (paymentId) => {
-            const dataToSend = {
-                ...baseData,
-                razorpay_payment_id: paymentId,
-            };
+        try {
+            await submitFormToPabbly(payload);
 
-            try {
-                await fetch(
-                    "https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjYwNTY4MDYzZjA0MzI1MjY4NTUzNjUxMzMi_pc",
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(dataToSend),
-                    }
-                );
-                window.location.href = redirectUrl;
-            } catch (err) {
-                console.error("Webhook error:", err);
-                alert("Something went wrong after payment. Please contact support.");
-            } finally {
-                setIsSubmitting(false);
-            }
-        });
+            openRazorpayCheckout({
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                amount: 100, // ₹299 in paise
+                onSuccess: () => {
+                    window.location.href = redirectUrl;
+                },
+            });
+        } catch (error: any) {
+            alert("Something went wrong.");
+            console.error("Error:", error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
 
