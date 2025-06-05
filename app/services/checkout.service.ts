@@ -1,71 +1,43 @@
-// service.ts
-export interface FormDataPayload {
-  name: string;
-  email: string;
-  phone: string;
-  campaignName: string;
-  workshopDate: string;
-  workshopTime: string;
-  utms: { [key: string]: string | null };
-  submittedAt: string;
-  landingPageUrl: string;
-}
-
-export const submitFormToPabbly = async (formData: FormDataPayload) => {
-  const payload = {
-    submittedAt: formData.submittedAt,
-    name: formData.name,
-    email: formData.email,
-    phone: formData.phone,
-    CampeignName: formData.campaignName,
-    WorkShopDate: formData.workshopDate,
-    WorkShopTime: formData.workshopTime,
-    ...formData.utms,
-    landingPageUrl: formData.landingPageUrl,
-  };
-
-  const response = await fetch(
-    `https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjYwNTY4MDYzZjA0MzI1MjY4NTUzNjUxMzMi_pc`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }
-  );
-
-  if (!response.ok) throw new Error("Webhook submission failed");
+export const loadRazorpayScript = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
 };
 
-export const openRazorpayCheckout = (formData: {
-  name: string;
-  email: string;
-  phone: string;
-  amount: number;
-  onSuccess: () => void;
-}) => {
-  // Check if Razorpay is loaded
-  if (typeof window === "undefined" || typeof (window as any).Razorpay === "undefined") {
-    alert("Razorpay SDK not loaded. Please check your integration.");
+export const openRazorpayCheckout = async (
+  user: { name: string; email: string; phone: string },
+  onSuccess: (paymentId: string) => void
+) => {
+  const loaded = await loadRazorpayScript();
+  if (!loaded) {
+    alert("Razorpay SDK failed to load. Are you online?");
     return;
   }
 
+  const res = await fetch("/api/create-order", { method: "POST" });
+  const data = await res.json();
+
   const options = {
-    key: "rzp_live_zT6qxWnoCMD9tU", // Replace with your actual Razorpay key
-    amount: formData.amount,
-    currency: "INR",
+    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+    amount: data.amount,
+    currency: data.currency,
     name: "StockTutor",
-    description: "Advisory Workshop",
+    description: "Algo Trading Masterclass",
+    order_id: data.id,
     handler: function (response: any) {
-      console.log("Payment success:", response);
-      formData.onSuccess();
+      onSuccess(response.razorpay_payment_id);
     },
     prefill: {
-      name: formData.name,
-      email: formData.email,
-      contact: formData.phone,
+      name: user.name,
+      email: user.email,
+      contact: user.phone,
     },
     theme: {
-      color: "#0d9488",
+      color: "#0f766e",
     },
   };
 
