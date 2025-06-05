@@ -320,7 +320,7 @@ function Page() {
 
                             {/* Right: Form */}
                             <div className="w-full max-w-md" id="form">
-                                <div className='flex flex-col space-y-4 py-4 items-center'>
+                                <div id="form" className='flex flex-col space-y-4 py-4 items-center'>
                                     <div className="flex justify-center">
                                         <Image
                                             src="https://stocktutor.com/_next/image?url=https%3A%2F%2Fst-staticimg.s3.ap-south-1.amazonaws.com%2Fassets%2Flogo.png&w=256&q=75"
