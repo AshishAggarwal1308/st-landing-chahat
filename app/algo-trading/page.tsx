@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useEffect } from "react";
 import Image from 'next/image';
 import { FaCheckCircle } from 'react-icons/fa';
 import Link from 'next/link';
@@ -23,8 +24,7 @@ import {
 
 import { formatDate_, timestamp } from '@/lib/masterclass_functions/formatDate';
 import Script from 'next/script';
-import PopupModal from '../components/FormPopup';
-
+import { submitFormToPabbly, openRazorpayCheckout } from "../services/checkout.service";
 
 const topics = [
     {
@@ -293,6 +293,19 @@ function Page() {
         setOfferEnd(months[tomorrow.getMonth()] + " " + tomorrow.getDate() + ", " + tomorrow.getFullYear())
     }, [])
 
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        script.onload = () => {
+            console.log("Razorpay SDK loaded");
+        };
+        script.onerror = () => {
+            console.error("Failed to load Razorpay SDK");
+        };
+        document.body.appendChild(script);
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormErrors({});
@@ -306,19 +319,18 @@ function Page() {
         let isValid = true;
         const errors: typeof formErrors = {};
 
-
         if (!formData.name) {
             errors.name = "Name is required.";
             isValid = false;
         }
 
         if (!isValidEmail(formData.email)) {
-            errors.email = "Invalid email address.";
+            errors.email = "Invalid email.";
             isValid = false;
         }
 
         if (!isValidPhone(formData.phone)) {
-            errors.phone = "Invalid phone number.";
+            errors.phone = "Invalid phone.";
             isValid = false;
         }
 
@@ -330,15 +342,9 @@ function Page() {
         setIsSubmitting(true);
 
         const urlParams = new URLSearchParams(window.location.search);
-        const redirectUrl = "https://stocktutor.chahataggrawal.in/algo-trading/thankyou";
+        const redirectUrl = "https://stocktutor.chahataggrawal.in/advisory/thankyou";
 
-
-        const data = {
-            submittedAt: timestamp(),
-            ...formData,
-            CampeignName: campName,
-            WorkShopTime: wDateTime,
-            WorkShopDate: wDate,
+        const utms = {
             utm_source: urlParams.get("utm_source"),
             utm_medium: urlParams.get("utm_medium"),
             utm_campaign: urlParams.get("utm_campaign"),
@@ -347,24 +353,38 @@ function Page() {
             utm_term: urlParams.get("utm_term"),
             adsetName: urlParams.get("adset name"),
             adName: urlParams.get("ad name"),
+        };
+
+        const payload = {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            campaignName: campName,
+            workshopDate: wDate,
+            workshopTime: wDateTime,
+            utms,
+            submittedAt: timestamp(),
             landingPageUrl: window.location.href,
         };
 
         try {
-            const response = await fetch(`https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjYwNTY4MDYzZjA0MzI1MjY4NTUzNjUxMzMi_pc`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-            window.location.href = redirectUrl;
+            await submitFormToPabbly(payload);
 
+            openRazorpayCheckout({
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                amount: 100, // ₹299 in paise
+                onSuccess: () => {
+                    window.location.href = redirectUrl;
+                },
+            });
         } catch (error: any) {
-            console.error("Submission error:", error.message);
-            alert("An error occurred. Please try again.");
+            alert("Something went wrong.");
+            console.error("Error:", error.message);
         } finally {
             setIsSubmitting(false);
         }
-
     };
 
 
