@@ -342,7 +342,7 @@ function Page() {
         setIsSubmitting(true);
 
         const urlParams = new URLSearchParams(window.location.search);
-        const redirectUrl = "https://stocktutor.chahataggrawal.in/advisory/thankyou";
+        const redirectUrl = "https://stocktutor.chahataggrawal.in/algo-trading/thankyou";
 
         const utms = {
             utm_source: urlParams.get("utm_source"),
@@ -374,7 +374,7 @@ function Page() {
                 name: formData.name,
                 email: formData.email,
                 phone: formData.phone,
-                amount: 100, // ₹299 in paise
+                amount: 10, // ₹299 in paise
                 onSuccess: () => {
                     window.location.href = redirectUrl;
                 },
