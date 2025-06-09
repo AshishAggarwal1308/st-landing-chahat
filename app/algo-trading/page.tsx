@@ -406,7 +406,6 @@ function Page() {
 
             <main>
                 <div className="w-full">
-
                     <section className="w-full flex flex-col items-center px-4 py-2 md:py-12 bg-white">
                         <div id="form" className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-1 md:gap-10 items-center">
                             {/* Left Content */}

@@ -16,6 +16,10 @@ module.exports = {
       },
       {
         protocol: 'https',
+        hostname: 'stoctips-images.s3.ap-south-1.amazonaws.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'st-staticimg.s3.ap-south-1.amazonaws.com'
       },
       {

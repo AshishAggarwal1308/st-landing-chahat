@@ -24,6 +24,7 @@ import {
 import { formatDate_, timestamp } from '@/lib/masterclass_functions/formatDate';
 import Script from 'next/script';
 import { PiHandWavingBold, PiPhoneCallBold, PiArrowRightBold } from "react-icons/pi";
+import { TimelineDemo } from '../components/timelineDemo';
 
 
 const topics = [
@@ -571,6 +572,8 @@ function Page() {
 
                         </div>
                     </section>
+
+                    <TimelineDemo/>
 
                     <section className="py-16 px-4 bg-white">
                         <div className="max-w-6xl mx-auto text-center">
